@@ -191,7 +191,7 @@ public class RNPushNotificationHelper {
                 }
             }
         } catch (Exception e) {
-            Log.e(LOG_TAG, "failed to send push notification", e);
+            Log.e(LOG_TAG, "failed to determine shouldIgnore notification", e);
         }
 
         return shouldIgnore;
@@ -199,19 +199,17 @@ public class RNPushNotificationHelper {
 
     public void sendToNotificationCentre(Bundle bundle) {
         try {
+            if(this.shouldIgnoreNotification(bundle)) {
+                return;
+            }
+            
             Class intentClass = getMainActivityClass();
-
             int smallIconResId = this.getIconResourceId(bundle);
             String notificationIdString = bundle.getString("id");
             int notificationID = Integer.parseInt(notificationIdString);
 
             String title = bundle.getString("title");
             String notificationType = bundle.getString("notification_type");
-
-            if(this.shouldIgnoreNotification(bundle)) {
-                return;
-            }
-
             String message = bundle.getString("message");
             String bundleTitle = bundle.getString("bundle_title");
             String bundleId = bundle.getString("bundle_id");
