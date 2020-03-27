@@ -43,6 +43,7 @@ public class RNPushNotificationHelper {
     private static final String EXTRAS_KEY_SUMMARY = "notifSummary";
     private static final String RB_PN_MANAGER_PREFERENCES_KEY = "rb_pn_manager";
     private static final String GROUP_ID_IN_VIEW_KEY = "GROUP_ID_IN_VIEW";
+    private static final String APP_IN_FOREGROUND_KEY = "APP_IN_FOREGROUND";
 
     private Context context;
     private RNPushNotificationConfig config;
@@ -174,7 +175,7 @@ public class RNPushNotificationHelper {
     }
 
     private boolean shouldIgnoreNotification(Bundle bundle){
-        boolean appIsInForeground = isAppOnForeground(context);
+        boolean appIsInForeground = isAppInForeground(context);
         boolean shouldIgnore = false;
 
         try{
@@ -202,20 +203,9 @@ public class RNPushNotificationHelper {
         }
     }
 
-    private boolean isAppOnForeground(Context context) {
-        boolean appIsInForeground = false;
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
-        if (appProcesses == null) {
-            appIsInForeground = false;
-        }
-        final String packageName = context.getPackageName();
-        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
-            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
-                appIsInForeground = true;
-            }
-        }
-        return appIsInForeground;
+    private boolean isAppInForeground(Context context) {
+        SharedPreferences pref = this.context.getSharedPreferences(RB_PN_MANAGER_PREFERENCES_KEY, Context.MODE_PRIVATE);
+        return pref.getBoolean(APP_IN_FOREGROUND_KEY, false);
     }
 
     public void sendToNotificationCentre(Bundle bundle) {
