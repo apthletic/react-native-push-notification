@@ -174,6 +174,7 @@ public class RNPushNotificationHelper {
     }
 
     private boolean shouldIgnoreNotification(Bundle bundle){
+        boolean appIsInForeground = isAppOnForeground(context);
         boolean shouldIgnore = false;
 
         try{
@@ -194,7 +195,27 @@ public class RNPushNotificationHelper {
             Log.e(LOG_TAG, "failed to determine shouldIgnore notification", e);
         }
 
-        return shouldIgnore;
+        if(appIsInForeground) {
+            return shouldIgnore;
+        }else{
+            return false;
+        }
+    }
+
+    private boolean isAppOnForeground(Context context) {
+        boolean appIsInForeground = false;
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            appIsInForeground = false;
+        }
+        final String packageName = context.getPackageName();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
+                appIsInForeground = true;
+            }
+        }
+        return appIsInForeground;
     }
 
     public void sendToNotificationCentre(Bundle bundle) {
