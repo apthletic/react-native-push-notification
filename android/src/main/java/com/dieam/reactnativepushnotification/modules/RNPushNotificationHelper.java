@@ -237,6 +237,9 @@ public class RNPushNotificationHelper {
 
             PendingIntent pendingIntent = PendingIntent.getActivity(context, notificationID, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
+            
+            PendingIntent pendingAppIntent = PendingIntent.getActivity(context, 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
 
             Bundle summaryExtras = new Bundle();
             summaryExtras.putString(EXTRAS_KEY_SUMMARY,EXTRAS_KEY_SUMMARY);
@@ -249,6 +252,7 @@ public class RNPushNotificationHelper {
                     .setExtras(summaryExtras)
                     .setVibrate(new long[]{0, DEFAULT_VIBRATION})
                     .setAutoCancel(bundle.getBoolean("autoCancel", true));
+            summaryBuilder.setContentIntent(pendingAppIntent);
 
             String sender = bundle.getString("sender");
             String chatMessage = bundle.getString("chat_message");
