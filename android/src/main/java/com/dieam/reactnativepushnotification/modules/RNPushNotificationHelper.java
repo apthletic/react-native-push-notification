@@ -242,8 +242,9 @@ public class RNPushNotificationHelper {
 
             PendingIntent pendingIntent = PendingIntent.getActivity(context, notificationID, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
-
-            PendingIntent appPendingIntent = PendingIntent.getActivity(context, new Random().nextInt(), intent, 0);
+            
+            PendingIntent pendingAppIntent = PendingIntent.getActivity(context, new Random().nextInt(), intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
 
             Bundle summaryExtras = new Bundle();
             summaryExtras.putString(EXTRAS_KEY_SUMMARY, EXTRAS_KEY_SUMMARY);
@@ -252,7 +253,7 @@ public class RNPushNotificationHelper {
                     .setSmallIcon(smallIconResId)
                     .setStyle(new NotificationCompat.InboxStyle().setSummaryText(APP_ROOT_NAME)).setGroup(APP_BUNDLE_ID)
                     .setGroupSummary(true).setExtras(summaryExtras).setVibrate(new long[] { 0, DEFAULT_VIBRATION })
-                    .setAutoCancel(bundle.getBoolean("autoCancel", true)).setContentIntent(appPendingIntent);
+                    .setAutoCancel(bundle.getBoolean("autoCancel", true)).setContentIntent(pendingAppIntent);
 
             String sender = bundle.getString("sender");
             String chatMessage = bundle.getString("chat_message");
@@ -312,7 +313,7 @@ public class RNPushNotificationHelper {
                         NOTIFICATION_CHANNEL_ID).setSmallIcon(smallIconResId).setGroup(APP_BUNDLE_ID)
                                 .setAutoCancel(bundle.getBoolean("autoCancel", true)).setExtras(extras)
                                 .setVibrate(new long[] { 0, DEFAULT_VIBRATION }).setStyle(notifStyle);
-                notificationBuilder.setContentIntent(appPendingIntent);
+                notificationBuilder.setContentIntent(pendingAppIntent);
 
                 notificationManager.notify(bundleIdInt, notificationBuilder.build());
             } else {
@@ -326,7 +327,7 @@ public class RNPushNotificationHelper {
                                 .setContentTitle(title).setContentText(message)
                                 .setVibrate(new long[] { 0, DEFAULT_VIBRATION })
                                 .setAutoCancel(bundle.getBoolean("autoCancel", true));
-                notificationBuilder.setContentIntent(appPendingIntent);
+                notificationBuilder.setContentIntent(pendingAppIntent);
 
                 // LP: is a single message
                 notificationManager.notify(notificationID, notificationBuilder.build());
