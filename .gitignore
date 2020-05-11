@@ -40,3 +40,9 @@ android/gradle/
 android/gradlew
 android/gradlew.bat
 android/src/main/gen
+
+
+android/.project
+android/.settings/
+example/android/.project
+example/android/.settings/
