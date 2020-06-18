@@ -151,19 +151,26 @@ public class RNPushNotificationHelper {
             getAlarmManager().set(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
         }
     }
-    
+
     private int getIconResourceId(Bundle bundle){
         String smallIcon = bundle.getString("smallIcon");
+        int smallIconResId;
         Resources res = context.getResources();
         String packageName = context.getPackageName();
-        int smallIconResId = 0;
 
         if (smallIcon != null) {
             smallIconResId = res.getIdentifier(smallIcon, "mipmap", packageName);
         } else {
-            smallIconResId = res.getIdentifier("ic_stat_name", "drawable", packageName);
+            smallIconResId = res.getIdentifier("ic_notification", "mipmap", packageName);
         }
 
+        if (smallIconResId == 0) {
+            smallIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
+
+            if (smallIconResId == 0) {
+                smallIconResId = android.R.drawable.ic_dialog_info;
+            }
+        }
         return smallIconResId;
     }
 
