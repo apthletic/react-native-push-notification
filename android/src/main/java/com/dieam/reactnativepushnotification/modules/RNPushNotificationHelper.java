@@ -213,7 +213,7 @@ public class RNPushNotificationHelper {
             if(this.shouldIgnoreNotification(bundle)) {
                 return;
             }
-            
+
             Class intentClass = getMainActivityClass();
             int smallIconResId = this.getIconResourceId(bundle);
             String notificationIdString = bundle.getString("id");
@@ -225,7 +225,7 @@ public class RNPushNotificationHelper {
             String bundleTitle = bundle.getString("bundle_title");
             String bundleId = bundle.getString("bundle_id");
 
-            int notificationTypeInt = Integer.parseInt(notificationType);
+            int notificationTypeInt = notificationType == null ? 0 : Integer.parseInt(notificationType);
 
             NotificationManager notificationManager = notificationManager();
             checkOrCreateChannel(notificationManager);
@@ -235,7 +235,13 @@ public class RNPushNotificationHelper {
             bundle.putBoolean("userInteraction", true);
             intent.putExtra("notification", bundle);
 
+            Intent summaryIntent = new Intent(context, intentClass);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            bundle.putBoolean("userInteraction", true);
+
             PendingIntent pendingIntent = PendingIntent.getActivity(context, notificationID, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingSummaryIntent = PendingIntent.getActivity(context, notificationID, summaryIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
             Bundle summaryExtras = new Bundle();
@@ -249,6 +255,7 @@ public class RNPushNotificationHelper {
                     .setExtras(summaryExtras)
                     .setVibrate(new long[]{0, DEFAULT_VIBRATION})
                     .setAutoCancel(bundle.getBoolean("autoCancel", true));
+            summaryBuilder.setContentIntent(pendingSummaryIntent);
 
             String sender = bundle.getString("sender");
             String chatMessage = bundle.getString("chat_message");
