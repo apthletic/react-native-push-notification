@@ -230,14 +230,15 @@ public class RNPushNotificationHelper {
             NotificationManager notificationManager = notificationManager();
             checkOrCreateChannel(notificationManager);
 
+            bundle.putBoolean("userInteraction", true);
+
             Intent intent = new Intent(context, intentClass);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            bundle.putBoolean("userInteraction", true);
             intent.putExtra("notification", bundle);
 
             Intent summaryIntent = new Intent(context, intentClass);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            bundle.putBoolean("userInteraction", true);
+            summaryIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            summaryIntent.putExtra("notification", bundle);
 
             PendingIntent pendingIntent = PendingIntent.getActivity(context, notificationID, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
