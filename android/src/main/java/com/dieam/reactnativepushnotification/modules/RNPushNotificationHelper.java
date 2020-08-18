@@ -334,6 +334,8 @@ public class RNPushNotificationHelper {
                 extras.putInt(EXTRAS_KEY_ENTITYID, notificationEntityId);
                 extras.putInt(EXTRAS_KEY_NOTIFTYPE, notificationTypeInt);
 
+                NotificationCompat.BigTextStyle notifStyle = new NotificationCompat.BigTextStyle().bigText(message);
+
                 NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
                     NOTIFICATION_CHANNEL_ID)
                     .setGroup(APP_BUNDLE_ID)
@@ -341,6 +343,7 @@ public class RNPushNotificationHelper {
                     .setSmallIcon(smallIconResId)
                     .setContentTitle(title)
                     .setContentText(message)
+                    .setStyle(notifStyle)
                     .setVibrate(new long[]{0, DEFAULT_VIBRATION})
                     .setAutoCancel(bundle.getBoolean("autoCancel", true));
                 notificationBuilder.setContentIntent(pendingIntent);
