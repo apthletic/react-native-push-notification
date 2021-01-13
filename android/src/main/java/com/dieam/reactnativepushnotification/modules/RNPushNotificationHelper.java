@@ -406,7 +406,7 @@ public class RNPushNotificationHelper {
             }
 
             notificationManager.notify(0, summaryBuilder.build());
-            
+
         } catch (Exception e) {
             Log.e(LOG_TAG, "failed to send push notification", e);
         }
