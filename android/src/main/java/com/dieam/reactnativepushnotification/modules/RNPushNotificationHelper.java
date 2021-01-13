@@ -44,6 +44,7 @@ public class RNPushNotificationHelper {
     private static final String RB_PN_MANAGER_PREFERENCES_KEY = "rb_pn_manager";
     private static final String GROUP_ID_IN_VIEW_KEY = "GROUP_ID_IN_VIEW";
     private static final String APP_IN_FOREGROUND_KEY = "APP_IN_FOREGROUND";
+    private static final int MAX_GROUPED_NOTIFICATIONS = 5;
 
     private Context context;
     private RNPushNotificationConfig config;
@@ -287,8 +288,7 @@ public class RNPushNotificationHelper {
                     chatMessage != null &&
                     chatTimestamp != null
             ) {
-
-                // LP: is supposed to be grouped message
+                // LP: is supposed to be grouped message for group chat only
                 int bundleIdInt = Integer.parseInt(bundleId);
 
                 Bundle extras = new Bundle();
@@ -324,6 +324,58 @@ public class RNPushNotificationHelper {
                         .setAutoCancel(bundle.getBoolean("autoCancel", true))
                         .setExtras(extras)
                         .setVibrate(new long[]{0, DEFAULT_VIBRATION})
+                        .setStyle(notifStyle);
+                notificationBuilder.setContentIntent(pendingIntent);
+
+                notificationManager.notify(bundleIdInt, notificationBuilder.build());
+            } else if (
+                bundleId != null &&
+                message != null &&
+                title != null &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+            ) {
+                // LP: is supposed to be a generic grouped message
+                int bundleIdInt = Integer.parseInt(bundleId);
+
+                Bundle extras = new Bundle();
+
+                for (StatusBarNotification notif : notificationManager.getActiveNotifications()) {
+                    if (notif.getId() == bundleIdInt ) {
+                        extras = notif.getNotification().extras;
+                    }
+                }
+
+                extras.putInt(EXTRAS_KEY_ENTITYID, notificationEntityId);
+                extras.putInt(EXTRAS_KEY_NOTIFTYPE, notificationTypeInt);
+
+                ArrayList<String> existingMessages = getArrayFromExtras(extras, EXTRAS_KEY_MESSAGES);
+                existingMessages.add(message);
+
+                NotificationCompat.InboxStyle notifStyle = new NotificationCompat.InboxStyle();
+                if(bundleTitle != null && !bundleTitle.isEmpty()) {
+                    notifStyle.setSummaryText(bundleTitle);
+                }
+                
+                int extraNotificationCount = existingMessages.size() - MAX_GROUPED_NOTIFICATIONS;
+
+                for (int index = existingMessages.size() - 1; index >= 0; index--) {
+                    notifStyle.addLine(existingMessages.get(index));
+                    if(existingMessages.size() > MAX_GROUPED_NOTIFICATIONS){
+                        if(index <= extraNotificationCount){
+                            notifStyle.addLine("+ "+extraNotificationCount+" more");
+                            break;
+                        }
+                    }
+                }
+
+                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+                        .setSmallIcon(smallIconResId)
+                        .setGroup(APP_BUNDLE_ID)
+                        .setAutoCancel(bundle.getBoolean("autoCancel", true))
+                        .setExtras(extras)
+                        .setVibrate(new long[]{0, DEFAULT_VIBRATION})
+                        .setContentTitle(title)
+                        .setContentText(message)
                         .setStyle(notifStyle);
                 notificationBuilder.setContentIntent(pendingIntent);
 
