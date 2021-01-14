@@ -1,5 +1,6 @@
 package com.dieam.reactnativepushnotification.modules;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.app.NotificationChannel;
@@ -11,15 +12,11 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import androidx.core.app.NotificationCompat;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-
-import androidx.core.app.NotificationCompat;
-
 import com.facebook.react.bridge.ReadableMap;
-
 import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -48,26 +45,18 @@ public class RNPushNotificationHelper {
     private static final String GROUP_ID_IN_VIEW_KEY = "GROUP_ID_IN_VIEW";
     private static final String APP_IN_FOREGROUND_KEY = "APP_IN_FOREGROUND";
     private static final int MAX_GROUPED_NOTIFICATIONS = 5;
+
+    private Context context;
+    private RNPushNotificationConfig config;
+    private final SharedPreferences scheduledNotificationsPersistence;
     private static final int ONE_MINUTE = 60 * 1000;
     private static final long ONE_HOUR = 60 * ONE_MINUTE;
     private static final long ONE_DAY = 24 * ONE_HOUR;
-    private static boolean channelCreated = false;
-    private final SharedPreferences scheduledNotificationsPersistence;
-    private final Context context;
-    private final RNPushNotificationConfig config;
 
     public RNPushNotificationHelper(Application context) {
         this.context = context;
         this.config = new RNPushNotificationConfig(context);
         this.scheduledNotificationsPersistence = context.getSharedPreferences(RNPushNotificationHelper.PREFERENCES_KEY, Context.MODE_PRIVATE);
-    }
-
-    private static void commit(SharedPreferences.Editor editor) {
-        if (Build.VERSION.SDK_INT < 9) {
-            editor.commit();
-        } else {
-            editor.apply();
-        }
     }
 
     public Class getMainActivityClass() {
@@ -87,10 +76,10 @@ public class RNPushNotificationHelper {
     }
 
     private int getGroupIdInView() {
-        try {
+        try{
             if (this.context != null) {
                 SharedPreferences sharedPref = context.getSharedPreferences(RB_PN_MANAGER_PREFERENCES_KEY, Context.MODE_PRIVATE);
-                return sharedPref.getInt(GROUP_ID_IN_VIEW_KEY, -1);
+                return sharedPref.getInt(GROUP_ID_IN_VIEW_KEY,-1);
             }
         } catch (Exception e) {
             Log.e(LOG_TAG, "failed to get the Group in view", e);
@@ -156,7 +145,7 @@ public class RNPushNotificationHelper {
         PendingIntent pendingIntent = toScheduleNotificationIntent(bundle);
 
         Log.d(LOG_TAG, String.format("Setting a notification with id %s at time %s",
-                bundle.getString("id"), fireDate));
+                bundle.getString("id"), Long.toString(fireDate)));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getAlarmManager().setExact(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
         } else {
@@ -164,7 +153,7 @@ public class RNPushNotificationHelper {
         }
     }
 
-    private int getIconResourceId(Bundle bundle) {
+    private int getIconResourceId(Bundle bundle){
         String smallIcon = bundle.getString("smallIcon");
         int smallIconResId;
         Resources res = context.getResources();
@@ -186,21 +175,21 @@ public class RNPushNotificationHelper {
         return smallIconResId;
     }
 
-    private boolean shouldIgnoreNotification(Bundle bundle) {
+    private boolean shouldIgnoreNotification(Bundle bundle){
         boolean appIsInForeground = isAppInForeground(context);
         boolean shouldIgnore = false;
 
-        try {
+        try{
             String notificationType = bundle.getString("notification_type");
             int notificationTypeInt = Integer.parseInt(notificationType);
 
-            if (notificationTypeInt == RB_GROUP_MSG_TYPE) {
+            if(notificationTypeInt == RB_GROUP_MSG_TYPE) {
                 String groupId = bundle.getString("group_id");
                 int notificationEntityGroupId = Integer.parseInt(groupId);
                 SharedPreferences pref = this.context.getSharedPreferences(RB_PN_MANAGER_PREFERENCES_KEY, Context.MODE_PRIVATE);
                 int groupIdInViewId = pref.getInt(GROUP_ID_IN_VIEW_KEY, -1);
 
-                if (groupIdInViewId != -1) {
+                if(groupIdInViewId != -1) {
                     shouldIgnore = notificationEntityGroupId == groupIdInViewId;
                 }
             }
@@ -208,9 +197,9 @@ public class RNPushNotificationHelper {
             Log.e(LOG_TAG, "failed to determine shouldIgnore notification", e);
         }
 
-        if (appIsInForeground) {
+        if(appIsInForeground) {
             return shouldIgnore;
-        } else {
+        }else{
             return false;
         }
     }
@@ -222,7 +211,7 @@ public class RNPushNotificationHelper {
 
     public void sendToNotificationCentre(Bundle bundle) {
         try {
-            if (this.shouldIgnoreNotification(bundle)) {
+            if(this.shouldIgnoreNotification(bundle)) {
                 return;
             }
 
@@ -258,7 +247,7 @@ public class RNPushNotificationHelper {
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
             Bundle summaryExtras = new Bundle();
-            summaryExtras.putString(EXTRAS_KEY_SUMMARY, EXTRAS_KEY_SUMMARY);
+            summaryExtras.putString(EXTRAS_KEY_SUMMARY,EXTRAS_KEY_SUMMARY);
 
             NotificationCompat.Builder summaryBuilder = new NotificationCompat.Builder(context,
                     NOTIFICATION_CHANNEL_ID)
@@ -275,7 +264,7 @@ public class RNPushNotificationHelper {
             String chatTimestamp = bundle.getString("chat_timestamp");
             Integer notificationEntityId = 0;
 
-            switch (notificationTypeInt) {
+            switch (notificationTypeInt){
                 case RB_WAGER_MSG_TYPE:
                     String wagerId = bundle.getString("wager_id");
                     notificationEntityId = Integer.parseInt(wagerId);
@@ -291,13 +280,13 @@ public class RNPushNotificationHelper {
             }
 
             if (
-                bundleTitle != null &&
-                bundleId != null &&
-                notificationTypeInt == RB_GROUP_MSG_TYPE &&
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                sender != null &&
-                chatMessage != null &&
-                chatTimestamp != null
+                    bundleTitle != null &&
+                    bundleId != null &&
+                    notificationTypeInt == RB_GROUP_MSG_TYPE &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    sender != null &&
+                    chatMessage != null &&
+                    chatTimestamp != null
             ) {
                 // LP: is supposed to be grouped message for group chat only
                 int bundleIdInt = Integer.parseInt(bundleId);
@@ -305,7 +294,7 @@ public class RNPushNotificationHelper {
                 Bundle extras = new Bundle();
 
                 for (StatusBarNotification notif : notificationManager.getActiveNotifications()) {
-                    if (notif.getId() == bundleIdInt) {
+                    if (notif.getId() == bundleIdInt ) {
                         extras = notif.getNotification().extras;
                     }
                 }
@@ -351,7 +340,7 @@ public class RNPushNotificationHelper {
                 Bundle extras = new Bundle();
 
                 for (StatusBarNotification notif : notificationManager.getActiveNotifications()) {
-                    if (notif.getId() == bundleIdInt) {
+                    if (notif.getId() == bundleIdInt ) {
                         extras = notif.getNotification().extras;
                     }
                 }
@@ -363,17 +352,17 @@ public class RNPushNotificationHelper {
                 existingMessages.add(message);
 
                 NotificationCompat.InboxStyle notifStyle = new NotificationCompat.InboxStyle();
-                if (bundleTitle != null && !bundleTitle.isEmpty()) {
+                if(bundleTitle != null && !bundleTitle.isEmpty()) {
                     notifStyle.setSummaryText(bundleTitle);
                 }
-
+                
                 int extraNotificationCount = existingMessages.size() - MAX_GROUPED_NOTIFICATIONS;
 
                 for (int index = existingMessages.size() - 1; index >= 0; index--) {
                     notifStyle.addLine(existingMessages.get(index));
-                    if (existingMessages.size() > MAX_GROUPED_NOTIFICATIONS) {
-                        if (index <= extraNotificationCount) {
-                            notifStyle.addLine("+ " + extraNotificationCount + " more");
+                    if(existingMessages.size() > MAX_GROUPED_NOTIFICATIONS){
+                        if(index <= extraNotificationCount){
+                            notifStyle.addLine("+ "+extraNotificationCount+" more");
                             break;
                         }
                     }
@@ -400,15 +389,15 @@ public class RNPushNotificationHelper {
                 NotificationCompat.BigTextStyle notifStyle = new NotificationCompat.BigTextStyle().bigText(message);
 
                 NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
-                        NOTIFICATION_CHANNEL_ID)
-                        .setGroup(APP_BUNDLE_ID)
-                        .setExtras(extras)
-                        .setSmallIcon(smallIconResId)
-                        .setContentTitle(title)
-                        .setContentText(message)
-                        .setStyle(notifStyle)
-                        .setVibrate(new long[]{0, DEFAULT_VIBRATION})
-                        .setAutoCancel(bundle.getBoolean("autoCancel", true));
+                    NOTIFICATION_CHANNEL_ID)
+                    .setGroup(APP_BUNDLE_ID)
+                    .setExtras(extras)
+                    .setSmallIcon(smallIconResId)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setStyle(notifStyle)
+                    .setVibrate(new long[]{0, DEFAULT_VIBRATION})
+                    .setAutoCancel(bundle.getBoolean("autoCancel", true));
                 notificationBuilder.setContentIntent(pendingIntent);
 
                 // LP: is a single message
@@ -495,7 +484,7 @@ public class RNPushNotificationHelper {
             // Sanity check, should never happen
             if (newFireDate != 0) {
                 Log.d(LOG_TAG, String.format("Repeating notification with id %s at time %s",
-                        bundle.getString("id"), newFireDate));
+                        bundle.getString("id"), Long.toString(newFireDate)));
                 bundle.putDouble("fireDate", newFireDate);
                 this.sendNotificationScheduled(bundle);
             }
@@ -567,6 +556,15 @@ public class RNPushNotificationHelper {
         return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
+    private static void commit(SharedPreferences.Editor editor) {
+        if (Build.VERSION.SDK_INT < 9) {
+            editor.commit();
+        } else {
+            editor.apply();
+        }
+    }
+
+    private static boolean channelCreated = false;
     private void checkOrCreateChannel(NotificationManager manager) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             return;
@@ -581,7 +579,7 @@ public class RNPushNotificationHelper {
         final String importanceString = bundle.getString("importance");
 
         if (importanceString != null) {
-            switch (importanceString.toLowerCase()) {
+            switch(importanceString.toLowerCase()) {
                 case "default":
                     importance = NotificationManager.IMPORTANCE_DEFAULT;
                     break;
