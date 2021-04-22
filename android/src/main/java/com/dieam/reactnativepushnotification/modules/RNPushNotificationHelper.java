@@ -218,7 +218,6 @@ public class RNPushNotificationHelper {
             final int smallIconResId = getIconResourceId(bundle);
             String notificationIdString = bundle.getString("id");
             final int notificationID = Integer.parseInt(notificationIdString);
-            boolean isSingleNotification = false;
 
             final String title = bundle.getString("title");
             String notificationType = bundle.getString("notification_type");
@@ -357,7 +356,7 @@ public class RNPushNotificationHelper {
                 if (bundleTitle != null && !bundleTitle.isEmpty()) {
                     notifStyle.setSummaryText(bundleTitle);
                 }
-                
+
                 int extraNotificationCount = existingMessages.size() - MAX_GROUPED_NOTIFICATIONS;
 
                 for (int index = existingMessages.size() - 1; index >= 0; index--) {
@@ -403,13 +402,7 @@ public class RNPushNotificationHelper {
 
                 // LP: is a single message
                 notificationManager.notify(notificationID, notificationBuilder.build());
-                isSingleNotification = true;
             }
-
-            if (!isSingleNotification) {
-                notificationManager.notify(0, summaryBuilder.build());
-            }
-
         } catch (Exception e) {
             Log.e(LOG_TAG, "failed to send push notification", e);
         }
