@@ -356,7 +356,7 @@ public class RNPushNotificationHelper {
                 if (bundleTitle != null && !bundleTitle.isEmpty()) {
                     notifStyle.setSummaryText(bundleTitle);
                 }
-                
+
                 int extraNotificationCount = existingMessages.size() - MAX_GROUPED_NOTIFICATIONS;
 
                 for (int index = existingMessages.size() - 1; index >= 0; index--) {
@@ -391,7 +391,6 @@ public class RNPushNotificationHelper {
 
                 NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(mContext,
                     NOTIFICATION_CHANNEL_ID)
-                    .setGroup(APP_BUNDLE_ID)
                     .setExtras(extras)
                     .setSmallIcon(smallIconResId)
                     .setContentTitle(title)
@@ -404,9 +403,6 @@ public class RNPushNotificationHelper {
                 // LP: is a single message
                 notificationManager.notify(notificationID, notificationBuilder.build());
             }
-
-            notificationManager.notify(0, summaryBuilder.build());
-
         } catch (Exception e) {
             Log.e(LOG_TAG, "failed to send push notification", e);
         }
