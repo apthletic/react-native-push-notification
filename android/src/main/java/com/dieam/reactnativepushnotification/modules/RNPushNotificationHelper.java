@@ -218,6 +218,7 @@ public class RNPushNotificationHelper {
             final int smallIconResId = getIconResourceId(bundle);
             String notificationIdString = bundle.getString("id");
             final int notificationID = Integer.parseInt(notificationIdString);
+            boolean isSingleNotification = false;
 
             final String title = bundle.getString("title");
             String notificationType = bundle.getString("notification_type");
@@ -396,16 +397,18 @@ public class RNPushNotificationHelper {
                     .setSmallIcon(smallIconResId)
                     .setContentTitle(title)
                     .setContentText(message)
-                    .setStyle(notifStyle)
                     .setVibrate(new long[]{0, DEFAULT_VIBRATION})
                     .setAutoCancel(bundle.getBoolean("autoCancel", true));
                 notificationBuilder.setContentIntent(pendingIntent);
 
                 // LP: is a single message
                 notificationManager.notify(notificationID, notificationBuilder.build());
+                isSingleNotification = true;
             }
 
-            notificationManager.notify(0, summaryBuilder.build());
+            if (!isSingleNotification) {
+                notificationManager.notify(0, summaryBuilder.build());
+            }
 
         } catch (Exception e) {
             Log.e(LOG_TAG, "failed to send push notification", e);
