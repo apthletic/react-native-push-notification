@@ -392,11 +392,11 @@ public class RNPushNotificationHelper {
 
                 NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(mContext,
                     NOTIFICATION_CHANNEL_ID)
-                    .setGroup(APP_BUNDLE_ID)
                     .setExtras(extras)
                     .setSmallIcon(smallIconResId)
                     .setContentTitle(title)
                     .setContentText(message)
+                    .setStyle(notifStyle)
                     .setVibrate(new long[]{0, DEFAULT_VIBRATION})
                     .setAutoCancel(bundle.getBoolean("autoCancel", true));
                 notificationBuilder.setContentIntent(pendingIntent);
